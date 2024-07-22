@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form, Input, Button, Upload, Card, Image, message } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
-import { RegisterEmployee } from "../calls/employees"; // API call to save employee details
+import { GetEmployeeDetails, RegisterEmployee } from '../../calls/employees';
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 function EmployeePage({ contactNumber }) {
@@ -9,6 +9,24 @@ function EmployeePage({ contactNumber }) {
   const [photo, setPhoto] = useState(null);
   const [form] = Form.useForm();
   const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    const fetchEmployeeDetails = async () => {
+      try {
+        const response = await GetEmployeeDetails();
+        if (response.success) {
+          setEmployee(response.data);
+          form.setFieldsValue(response.data); // Populate form with existing data
+        } else {
+          message.error(response.message);
+        }
+      } catch (error) {
+        message.error(error.message);
+      }
+    };
+
+    fetchEmployeeDetails();
+  }, [form]);
 
   const validatePhoto = (file) => {
     const isImage = file.type.startsWith('image/');
@@ -165,9 +183,6 @@ function EmployeePage({ contactNumber }) {
                 <Form.Item label="Contact Number" name="contactNumber">
                   <Input value={contactNumber} disabled />
                 </Form.Item>
-                
-
-  
 
                 <Form.Item>
                   <Button type="primary" htmlType="submit">
